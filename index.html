@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LaTeX Editor Pro</title>
+    
+    <!-- CSS Files -->
+    <link rel="stylesheet" href="css/variables.css">
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/utility.css">
+    
+    <!-- Third-party Dependencies -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    
+    <!-- Defer loading of our application scripts -->
+    <script src="js/core/config.js" defer></script>
+    <script src="js/core/events.js" defer></script>
+    <script src="js/core/renderer.js" defer></script>
+    <script src="js/storage/fileSystem.js" defer></script>
+    <script src="js/storage/storageCore.js" defer></script>
+    <script src="js/ui/components.js" defer></script>
+    <script src="js/ui/editor.js" defer></script>
+    <script src="js/ui/sidebar.js" defer></script>
+    <script src="js/app.js" defer></script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Main Toolbar -->
+        <header class="toolbar">
+            <div class="toolbar-left">
+                <button id="menuToggle" class="icon-btn" title="Toggle Menu">
+                    <svg class="icon" viewBox="0 0 24 24">
+                        <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+                    </svg>
+                </button>
+                <div class="file-controls">
+                    <button id="newFile" class="btn primary" title="New File (Ctrl+N)">
+                        <svg class="icon" viewBox="0 0 24 24">
+                            <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+                        </svg>
+                        New
+                    </button>
+                    <button id="saveFile" class="btn" title="Save (Ctrl+S)">
+                        <svg class="icon" viewBox="0 0 24 24">
+                            <path d="M17 3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V7l-4-4zm2 16H5V5h11.17L19 7.83V19zm-7-7c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+                        </svg>
+                        Save
+                    </button>
+                </div>
+            </div>
+            <div class="toolbar-right">
+                <button id="settings" class="icon-btn" title="Settings">
+                    <svg class="icon" viewBox="0 0 24 24">
+                        <path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 00.12-.61l-1.92-3.32a.49.49 0 00-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.48.48 0 00-.48-.41h-3.84a.48.48 0 00-.48.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.07.62-.07.94s.02.64.07.94l-2.03 1.58a.49.49 0 00-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.48-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.03-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/>
+                    </svg>
+                </button>
+                <button id="themeToggle" class="icon-btn" title="Toggle Theme">
+                    <svg class="icon" viewBox="0 0 24 24">
+                        <path d="M20 8.69V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12 20 8.69zm-2 5.79V18h-3.52L12 20.48 9.52 18H6v-3.52L3.52 12 6 9.52V6h3.52L12 3.52 14.48 6H18v3.52L20.48 12 18 14.48zM12 6.5v11c3.03 0 5.5-2.47 5.5-5.5S15.03 6.5 12 6.5z"/>
+                    </svg>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Content Area -->
+        <main class="content">
+            <!-- Editor Section -->
+            <section class="editor-section">
+                <div class="editor-container">
+                    <div class="editor-toolbar">
+                        <button class="btn" data-command="bold" title="Bold (Ctrl+B)">𝐁</button>
+                        <button class="btn" data-command="italic" title="Italic (Ctrl+I)">𝐼</button>
+                        <button class="btn" data-command="math" title="Math Mode ($)">∑</button>
+                        <button class="btn" data-command="displaymath" title="Display Math ($$)">⟮∑⟯</button>
+                    </div>
+                    <textarea id="editor" class="latex-editor" spellcheck="false" 
+                            placeholder="Enter your LaTeX here..."></textarea>
+                </div>
+                
+                <!-- Preview Section -->
+                <div class="preview-container">
+                    <div class="preview-toolbar">
+                        <button id="copyOutput" class="btn" title="Copy Output">
+                            <svg class="icon" viewBox="0 0 24 24">
+                                <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+                            </svg>
+                            Copy
+                        </button>
+                        <button id="downloadPDF" class="btn" title="Download PDF">
+                            <svg class="icon" viewBox="0 0 24 24">
+                                <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
+                            </svg>
+                            PDF
+                        </button>
+                    </div>
+                    <div id="preview" class="preview-content"></div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Side Drawer -->
+        <aside id="sideDrawer" class="side-drawer">
+            <div class="drawer-header">
+                <h2>Saved Documents</h2>
+                <button id="pinDrawer" class="icon-btn" title="Pin Drawer">
+                    <svg class="icon" viewBox="0 0 24 24">
+                        <path d="M17 4v7l2 3v2h-6v5l-1 1-1-1v-5H5v-2l2-3V4c0-1.1.9-2 2-2h6c1.1 0 2 .9 2 2zM9 4v7.75L7.5 14h9L15 11.75V4H9z"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="drawer-search">
+                <input type="text" id="searchDocs" placeholder="Search documents...">
+                <select id="sortDocs">
+                    <option value="modified">Last Modified</option>
+                    <option value="name">Name</option>
+                    <option value="created">Created Date</option>
+                </select>
+            </div>
+            <div id="savedList" class="saved-list"></div>
+        </aside>
+
+        <!-- Settings Dialog -->
+        <dialog id="settingsDialog" class="dialog">
+            <div class="dialog-header">
+                <h2>Settings</h2>
+                <button class="icon-btn" data-close>×</button>
+            </div>
+            <div class="dialog-content">
+                <form id="settingsForm">
+                    <div class="form-group">
+                        <label for="autoSaveInterval">Auto-save Interval (seconds)</label>
+                        <input type="number" id="autoSaveInterval" min="15" max="300" value="30">
+                    </div>
+                    <div class="form-group">
+                        <label for="fontSize">Font Size</label>
+                        <select id="fontSize">
+                            <option value="12">12px</option>
+                            <option value="14" selected>14px</option>
+                            <option value="16">16px</option>
+                            <option value="18">18px</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="theme">Theme</label>
+                        <select id="theme">
+                            <option value="dark">Dark</option>
+                            <option value="light">Light</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="livePreview" checked>
+                            Enable Live Preview
+                        </label>
+                    </div>
+                </form>
+            </div>
+            <div class="dialog-footer">
+                <button class="btn" data-close>Cancel</button>
+                <button class="btn primary" id="saveSettings">Save Changes</button>
+            </div>
+        </dialog>
+    </div>
+</body>
+</html>
