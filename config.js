@@ -1,12 +1,10 @@
 /**
  * Configuration settings for the LaTeX Editor
- * @module config
+ * @created 2025-02-28 11:51:58 UTC
+ * @author slayer587
  */
 
 const CONFIG = {
-    /**
-     * Default application settings
-     */
     defaults: {
         theme: 'dark',
         fontSize: '14',
@@ -18,9 +16,6 @@ const CONFIG = {
         }
     },
 
-    /**
-     * MathJax configuration
-     */
     mathJax: {
         loader: {load: ['[tex]/ams']},
         tex: {
@@ -35,31 +30,13 @@ const CONFIG = {
         }
     },
 
-    /**
-     * Storage keys
-     */
     storageKeys: {
         settings: 'latex-editor-settings',
         documents: 'latex-editor-documents',
         currentDoc: 'latex-editor-current',
         lastSaveTime: 'latex-editor-last-save'
-    },
-
-    /**
-     * File system settings
-     */
-    fileSystem: {
-        suggestedName: 'document.tex',
-        types: [
-            {
-                description: 'LaTeX files',
-                accept: {
-                    'text/x-tex': ['.tex']
-                }
-            }
-        ]
     }
 };
 
-// Prevent modifications to the configuration object
-Object.freeze(CONFIG);
+// Make sure CONFIG is available globally
+window.CONFIG = CONFIG;
