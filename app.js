@@ -1,7 +1,7 @@
 /**
  * Main Application Module
  * @module app
- * @created 2025-02-28 11:08:12 UTC
+ * @created 2025-02-28 11:24:54 UTC
  * @author slayer587
  */
 
@@ -22,9 +22,11 @@ class LatexEditor {
             await storageManager.init();
             uiComponents.init();
             editorUI.init();
+            sidebar.init(); // Initialize sidebar
 
             // Setup event listeners
             this.setupEventListeners();
+            this.setupButtonHandlers(); // Add button handlers
 
             // Mark as initialized
             this.initialized = true;
@@ -38,138 +40,105 @@ class LatexEditor {
     }
 
     /**
-     * Setup application event listeners
+     * Setup button handlers
      */
-    setupEventListeners() {
-        // Document management events
-        EventManager.subscribe(EVENTS.DOCUMENT_SAVE, async (event) => {
-            const content = editorUI.getContent();
-            const timestamp = new Date().toISOString();
+    setupButtonHandlers() {
+        // Menu toggle button
+        const menuToggle = document.getElementById('menuToggle');
+        if (menuToggle) {
+            menuToggle.addEventListener('click', () => {
+                sidebar.toggle();
+            });
+        }
 
-            if (!content.trim()) {
-                uiComponents.showToast('Cannot save empty document', 'warning');
-                return;
-            }
+        // New file button
+        const newFile = document.getElementById('newFile');
+        if (newFile) {
+            newFile.addEventListener('click', () => {
+                this.newDocument();
+            });
+        }
 
-            try {
-                await storageManager.saveDocument({
-                    id: crypto.randomUUID(),
-                    title: 'Untitled Document',
-                    content,
-                    created: timestamp,
-                    lastModified: timestamp
-                });
+        // Save file button
+        const saveFile = document.getElementById('saveFile');
+        if (saveFile) {
+            saveFile.addEventListener('click', () => {
+                EventManager.emit(EVENTS.DOCUMENT_SAVE, { type: 'manual' });
+            });
+        }
 
-                if (event?.type === 'manual') {
-                    uiComponents.showToast('Document saved successfully', 'success');
+        // Download PDF button
+        const downloadPDF = document.getElementById('downloadPDF');
+        if (downloadPDF) {
+            downloadPDF.addEventListener('click', async () => {
+                const content = document.getElementById('preview').innerHTML;
+                const filename = this.getCurrentDocumentTitle() || 'document';
+                
+                try {
+                    await fileSystem.exportPDF(content, filename);
+                    uiComponents.showToast('PDF exported successfully', 'success');
+                } catch (error) {
+                    uiComponents.showToast('Failed to export PDF', 'error');
                 }
-            } catch (error) {
-                uiComponents.showToast('Failed to save document', 'error');
-            }
-        });
+            });
+        }
 
-        EventManager.subscribe(EVENTS.DOCUMENT_LOAD, async (document) => {
-            try {
-                editorUI.setContent(document.content);
-                uiComponents.showToast('Document loaded successfully', 'success');
-            } catch (error) {
-                uiComponents.showToast('Failed to load document', 'error');
-            }
-        });
+        // Copy output button
+        const copyOutput = document.getElementById('copyOutput');
+        if (copyOutput) {
+            copyOutput.addEventListener('click', () => {
+                const content = document.getElementById('preview').textContent;
+                navigator.clipboard.writeText(content)
+                    .then(() => uiComponents.showToast('Content copied to clipboard', 'success'))
+                    .catch(() => uiComponents.showToast('Failed to copy content', 'error'));
+            });
+        }
 
-        // Error handling
-        EventManager.subscribe(EVENTS.ERROR, (error) => {
-            console.error('Application error:', error);
-            uiComponents.showToast(error.message, 'error');
-        });
-
-        // Settings changes
-        EventManager.subscribe(EVENTS.SETTINGS_CHANGE, (settings) => {
-            if (settings.autoSaveInterval) {
-                storageManager.setupAutoSave();
-            }
-        });
-
-        // Setup keyboard shortcuts
-        document.addEventListener('keydown', (e) => {
-            if (e.ctrlKey || e.metaKey) {
-                switch (e.key.toLowerCase()) {
-                    case 'n':
-                        e.preventDefault();
-                        this.newDocument();
-                        break;
-                    case 'o':
-                        e.preventDefault();
-                        this.importDocument();
-                        break;
+        // Editor toolbar buttons
+        const editorToolbar = document.querySelector('.editor-toolbar');
+        if (editorToolbar) {
+            editorToolbar.addEventListener('click', (e) => {
+                const button = e.target.closest('[data-command]');
+                if (button) {
+                    const command = button.dataset.command;
+                    editorUI.executeCommand(command);
                 }
-            }
-        });
-
-        // Handle file import
-        document.getElementById('importFile')?.addEventListener('click', () => {
-            this.importDocument();
-        });
-    }
-
-    /**
-     * Create new document
-     */
-    newDocument() {
-        if (editorUI.getContent().trim()) {
-            // Show confirmation dialog
-            const dialog = document.createElement('dialog');
-            dialog.className = 'dialog';
-            dialog.innerHTML = `
-                <div class="dialog-header">
-                    <h2>Create New Document</h2>
-                    <button class="icon-btn" data-close>×</button>
-                </div>
-                <div class="dialog-content">
-                    <p>Do you want to save the current document first?</p>
-                </div>
-                <div class="dialog-footer">
-                    <button class="btn" data-action="discard">Don't Save</button>
-                    <button class="btn" data-action="save">Save First</button>
-                    <button class="btn primary" data-close>Cancel</button>
-                </div>
-            `;
-
-            dialog.querySelector('[data-close]').addEventListener('click', () => {
-                dialog.close();
-                dialog.remove();
             });
+        }
 
-            dialog.querySelector('[data-action="save"]').addEventListener('click', async () => {
-                await EventManager.emit(EVENTS.DOCUMENT_SAVE, { type: 'manual' });
-                editorUI.setContent('');
-                dialog.close();
-                dialog.remove();
+        // Settings button
+        const settingsBtn = document.getElementById('settings');
+        if (settingsBtn) {
+            settingsBtn.addEventListener('click', () => {
+                const dialog = document.getElementById('settingsDialog');
+                if (dialog) {
+                    dialog.showModal();
+                }
             });
+        }
 
-            dialog.querySelector('[data-action="discard"]').addEventListener('click', () => {
-                editorUI.setContent('');
-                dialog.close();
-                dialog.remove();
+        // Theme toggle button
+        const themeToggle = document.getElementById('themeToggle');
+        if (themeToggle) {
+            themeToggle.addEventListener('click', () => {
+                const currentTheme = document.documentElement.dataset.theme;
+                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                document.documentElement.dataset.theme = newTheme;
+                localStorage.setItem('theme', newTheme);
+                EventManager.emit(EVENTS.THEME_CHANGE, newTheme);
             });
-
-            document.body.appendChild(dialog);
-            dialog.showModal();
-        } else {
-            editorUI.setContent('');
         }
     }
 
     /**
-     * Import document from file
+     * Get current document title
+     * @returns {string} Document title or default name
      */
-    async importDocument() {
-        const imported = await fileSystem.importFile();
-        if (imported) {
-            editorUI.setContent(imported.content);
-            uiComponents.showToast('Document imported successfully', 'success');
-        }
+    getCurrentDocumentTitle() {
+        return storageManager.currentDocument?.title || 'Untitled Document';
     }
+
+    // ... (rest of the existing code remains the same)
 }
 
 // Initialize application when DOM is loaded
