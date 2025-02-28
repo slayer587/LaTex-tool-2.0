@@ -13,8 +13,24 @@
     
     <!-- Third-party Dependencies -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+    <!-- Core Application Scripts -->
+    <script>
+        // Global error handler
+        window.addEventListener('error', function(e) {
+            console.error('Global error:', e.error);
+        });
+        
+        // Check if all required globals are loaded
+        function checkDependencies() {
+            return typeof Toastify !== 'undefined' && 
+                   typeof MathJax !== 'undefined' && 
+                   typeof html2pdf !== 'undefined';
+        }
+    </script>
     
     <!-- Defer loading of our application scripts -->
     <script src="config.js" defer></script>
@@ -26,6 +42,22 @@
     <script src="editor.js" defer></script>
     <script src="sidebar.js" defer></script>
     <script src="app.js" defer></script>
+    <!-- Initialize App -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Wait for dependencies to load
+            const checkInterval = setInterval(function() {
+                if (checkDependencies()) {
+                    clearInterval(checkInterval);
+                    console.log('All dependencies loaded, initializing app...');
+                    const app = new LatexEditor();
+                    app.init().catch(console.error);
+                } else {
+                    console.log('Waiting for dependencies...');
+                }
+            }, 100);
+        });
+    </script>
 </head>
 <body>
     <div class="app-container">
