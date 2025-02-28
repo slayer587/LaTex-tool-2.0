@@ -57,15 +57,43 @@ class EditorUI {
      * Setup toolbar actions
      */
     setupToolbarActions() {
-        this.editorToolbar.addEventListener('click', (e) => {
-            const button = e.target.closest('[data-command]');
-            if (!button) return;
+        const toolbar = document.querySelector('.editor-toolbar');
+        if (toolbar) {
+            toolbar.addEventListener('click', (e) => {
+                const button = e.target.closest('[data-command]');
+                if (!button) return;
 
-            const command = button.dataset.command;
-            this.executeCommand(command);
-        });
+                e.preventDefault();
+                const command = button.dataset.command;
+                this.executeCommand(command);
+                this.editor.focus();
+            });
+        }
+
+        // Add event listeners for copy and download buttons
+        const copyButton = document.getElementById('copyOutput');
+        if (copyButton) {
+            copyButton.addEventListener('click', () => {
+                const content = this.preview.textContent;
+                navigator.clipboard.writeText(content)
+                    .then(() => uiComponents.showToast('Content copied to clipboard', 'success'))
+                    .catch(() => uiComponents.showToast('Failed to copy content', 'error'));
+            });
+        }
+
+        const downloadButton = document.getElementById('downloadPDF');
+        if (downloadButton) {
+            downloadButton.addEventListener('click', async () => {
+                try {
+                    const content = this.preview.innerHTML;
+                    await fileSystem.exportPDF(content, 'document.pdf');
+                    uiComponents.showToast('PDF exported successfully', 'success');
+                } catch (error) {
+                    uiComponents.showToast('Failed to export PDF', 'error');
+                }
+            });
+        }
     }
-
     /**
      * Execute editor command
      * @param {string} command - Command to execute
