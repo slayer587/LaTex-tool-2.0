@@ -34,13 +34,17 @@ class LatexRenderer {
      * @param {number} delay - Debounce delay in ms
      */
     processContent(content, delay = 500) {
-        clearTimeout(this.debounceTimer);
-        
-        this.debounceTimer = setTimeout(() => {
-            const processed = this.preProcess(content);
-            this.queueRender(processed);
-        }, delay);
+    if (!content) {
+        document.getElementById('preview').innerHTML = '';
+        return;
     }
+
+    clearTimeout(this.debounceTimer);
+    this.debounceTimer = setTimeout(() => {
+        const processed = this.preProcess(content);
+        this.queueRender(processed);
+    }, delay);
+}
 
     /**
      * Pre-process LaTeX content
